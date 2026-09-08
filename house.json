@@ -1,0 +1,173 @@
+{
+  "version": "0.6.0",
+  "defaultBranch": "main",
+  "branchPolicy": "pr",
+  "protectedBranches": [
+    "master",
+    "main"
+  ],
+  "guard": {
+    "by": "plugin",
+    "decided": "2026-09-08",
+    "why": "the user-scope house plugin supplies the branch guard; this repo vendors no hook file of its own"
+  },
+  "modules": {
+    "claude-code": {
+      "enabled": true,
+      "config": {
+        "claudeWorkflowGlobs": [],
+        "claudeGlobs": [
+          ".claude/**",
+          "CLAUDE.md"
+        ]
+      }
+    },
+    "data-pipelines": {
+      "enabled": false,
+      "config": {
+        "pipelineGlobs": []
+      }
+    },
+    "database": {
+      "enabled": false,
+      "config": {
+        "dbGlobs": [
+          "db/**",
+          "migrations/**",
+          "src/lib/db/**",
+          "scripts/db-*"
+        ]
+      }
+    },
+    "deployment": {
+      "enabled": false,
+      "config": {
+        "deployGlobs": []
+      }
+    },
+    "docs": {
+      "enabled": true,
+      "config": {
+        "roots": [],
+        "excludeFiles": [],
+        "archiveDirs": [],
+        "scanArchive": false,
+        "haystackDirs": [
+          "queries",
+          "schema.sql"
+        ],
+        "extraPathRoots": [],
+        "packageRoots": [],
+        "buildArtifactPrefixes": [],
+        "classPrefixes": [],
+        "componentSuffixes": [],
+        "componentAllowlist": [],
+        "bareScriptAllowlist": [],
+        "lengthLimits": {
+          "CLAUDE.md": 100,
+          "README.md": 295,
+          "DATA-DICTIONARY.md": 195,
+          ".claude/rules/house/*.md": 200
+        },
+        "maxCoLoadLines": 400,
+        "docFiles": [
+          "CLAUDE.md",
+          "README.md",
+          "CHANGELOG.md",
+          "DATA-DICTIONARY.md",
+          ".claude/rules/**"
+        ],
+        "emDash": {
+          "mode": "all",
+          "paths": [
+            "README.md",
+            "CHANGELOG.md",
+            "DATA-DICTIONARY.md",
+            "CLAUDE.md",
+            ".github/PULL_REQUEST_TEMPLATE.md"
+          ],
+          "exclude": []
+        }
+      }
+    },
+    "engineering": {
+      "enabled": true,
+      "config": {
+        "codeGlobs": [],
+        "gateGlobs": [],
+        "codeRoots": [
+          "scripts/**",
+          "src/**",
+          "lib/**"
+        ]
+      }
+    },
+    "github": {
+      "enabled": true,
+      "config": {
+        "actionsBudgetMinutes": 2000,
+        "secretGlobs": [],
+        "githubGlobs": [
+          ".github/**",
+          ".githooks/**",
+          ".env.example"
+        ]
+      }
+    },
+    "llm-output": {
+      "enabled": false,
+      "config": {
+        "llmGlobs": []
+      }
+    },
+    "testing": {
+      "enabled": false,
+      "config": {
+        "testGlobs": [],
+        "gateGlobs": [],
+        "testRoots": [
+          "tests/**",
+          "test/**"
+        ]
+      }
+    }
+  },
+  "deviations": [
+    {
+      "kind": "disabled-module",
+      "module": "data-pipelines",
+      "what": "modules.data-pipelines disabled",
+      "why": "this repo is documentation and SQL only: no application code, no database it owns, nothing to deploy, no test suite and no LLM output surface, so the module's rules would load on paths that do not exist here",
+      "decided": "2026-09-08"
+    },
+    {
+      "kind": "disabled-module",
+      "module": "database",
+      "what": "modules.database disabled",
+      "why": "this repo is documentation and SQL only: no application code, no database it owns, nothing to deploy, no test suite and no LLM output surface, so the module's rules would load on paths that do not exist here",
+      "decided": "2026-09-08"
+    },
+    {
+      "kind": "disabled-module",
+      "module": "deployment",
+      "what": "modules.deployment disabled",
+      "why": "this repo is documentation and SQL only: no application code, no database it owns, nothing to deploy, no test suite and no LLM output surface, so the module's rules would load on paths that do not exist here",
+      "decided": "2026-09-08"
+    },
+    {
+      "kind": "disabled-module",
+      "module": "testing",
+      "what": "modules.testing disabled",
+      "why": "this repo is documentation and SQL only: no application code, no database it owns, nothing to deploy, no test suite and no LLM output surface, so the module's rules would load on paths that do not exist here",
+      "decided": "2026-09-08"
+    },
+    {
+      "kind": "disabled-module",
+      "module": "llm-output",
+      "what": "modules.llm-output disabled",
+      "why": "this repo is documentation and SQL only: no application code, no database it owns, nothing to deploy, no test suite and no LLM output surface, so the module's rules would load on paths that do not exist here",
+      "decided": "2026-09-08"
+    }
+  ],
+  "ratchet": {}
+}
