@@ -168,15 +168,12 @@ traced to the bytes it was read from.
 | `fetched_at` | When. |
 | `superseded_by` | Points at the artifact that replaced this one. A source that changed between fetches becomes a new row with the old one marked, rather than a silent overwrite. |
 
-Two kinds of row need a word. A `vote_panel_<id>` row with `http_status` 500 is
-not a failed fetch: it is the partial panel Granicus returns when its renderer
-crashes on a recusal row, archived with the status it came with, and the
-motion that cites it carries `panel_status = 'partial'`. An `asr_envelope` row
-has a `source_url` beginning `local:` rather than `https:`, because the
-document is the maintainer's own transcription of the archived recording, not
-something the city served; its sha256 is still the hash of the exact bytes a
-`transcript` value was read from, and the recording it transcribes is the
-`video_mp4` row for the same meeting.
+A `vote_panel_<id>` row with `http_status` 500 is not a failed fetch: it is the
+partial panel Granicus returns when its renderer crashes on a recusal row, and
+the motion citing it carries `panel_status = 'partial'`. An `asr_envelope` row
+has a `local:` rather than `https:` `source_url`: it is the maintainer's own
+transcription of the archived recording (the meeting's `video_mp4` row), and
+its sha256 is still the hash of the exact bytes a `transcript` value was read from.
 
 The archived files themselves are not published. The ledger is, so a claim can
 be checked against the city's own copy at the recorded URL.

@@ -21,8 +21,7 @@ Ten tables and two views, all in the `meetings` schema.
 - `item_identifiers`: ordinance, resolution, case, parcel and address numbers
   pulled out of agenda titles so they can be looked up exactly.
 - `motions`: what was moved, by whom, seconded by whom, and the outcome, plus
-  which archived index and vote panel it was read from and whether that panel
-  was complete.
+  the archived index and vote panel it was read from.
 - `votes`: one row per member per motion, with the vote value where a source
   published one, and the archived document that value was read from.
 - `members`: the people the clerk's labels resolve to. Name only.
@@ -245,15 +244,12 @@ the verb goes; those are NULL rather than guessed at, and they need their own
 decision in your denominator.
 
 **`panel_status` says whether the member list is whole.** Granicus's vote-panel
-page crashes while rendering the row of any member whose value is a recusal or
-abstention, and returns the rows it had rendered under an HTTP 500. Those rows
-are the clerk's record and are published; the motion carries
-`panel_status = 'partial'` and its `panel_artifact_id` points at a ledger row
-whose `http_status` is 500. The member the crash swallowed is not in the panel
-and is not inferred from it; the approved minutes name them later, and until
-then an attendance or denominator computed from a partial panel is one member
-short. `complete` is a whole panel and `none` means no panel was served, so any
-member rows on that motion were named by the minutes instead.
+page crashes on the row of any member who recused or abstained and returns the
+rows it had rendered under an HTTP 500. Those rows are published and the motion
+carries `panel_status = 'partial'`, citing a ledger row whose `http_status` is
+500. The missing member is not inferred; the approved minutes name them later,
+and until then a denominator from a partial panel is one member short. `none`
+means no panel was served and any member rows were named by the minutes.
 
 **`member_name` is the clerk's label at that meeting, not a person.** It is the
 identity of the panel row, and it changes when the office changes: the same
@@ -280,10 +276,9 @@ correctly". `motions.panel_status` marks every one of them. The seven newest
 (2026-08-25 and 2026-09-01) will fill in from the approved minutes when the
 Clerk publishes them.
 
-Ten meeting rows carry a `regular` kind with no agenda items and a recording of
-zero length. They are Granicus placeholders for dates the council did not meet
-in that form, kept because the clerk's archive lists them, and the eight
-caption-stream dates above are among them.
+Ten meeting rows, the eight caption-stream dates among them, are `regular`
+with no agenda items and a zero-length recording: Granicus placeholders, kept
+because the clerk's archive lists them.
 
 Coverage is the City Council only. Commissions and committees are planned, and
 the `bodies` table and the `body_slug` column on `meetings` are already in place

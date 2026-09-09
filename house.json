@@ -169,5 +169,24 @@
       "decided": "2026-09-08"
     }
   ],
-  "ratchet": {}
+  "ratchet": {
+    "README.md": 316,
+    "DATA-DICTIONARY.md": 215
+  },
+  "ratchetRaises": [
+    {
+      "path": "README.md",
+      "from": 295,
+      "to": 316,
+      "why": "row-level provenance shipped: a second view, panel_status and the Granicus recusal crash need a paragraph each in How to read the votes correctly and Known gaps",
+      "decided": "2026-09-09"
+    },
+    {
+      "path": "DATA-DICTIONARY.md",
+      "from": 195,
+      "to": 215,
+      "why": "four new columns (source_artifact_id, structure_artifact_id, panel_artifact_id, panel_status) and the v_vote_sources view each need a row or section",
+      "decided": "2026-09-09"
+    }
+  ]
 }
