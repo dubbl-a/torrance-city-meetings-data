@@ -13,22 +13,25 @@ the City of Torrance, and the underlying material is public record.
 
 ## What is in it
 
-Ten tables and one view, all in the `meetings` schema.
+Ten tables and two views, all in the `meetings` schema.
 
 - `bodies`: the city bodies covered. One row today, the City Council.
 - `meetings`: one row per meeting, with its date, kind, and video link.
 - `agenda_items`: the clerk's agenda, in order, nested into chapters.
 - `item_identifiers`: ordinance, resolution, case, parcel and address numbers
   pulled out of agenda titles so they can be looked up exactly.
-- `motions`: what was moved, by whom, seconded by whom, and the outcome.
+- `motions`: what was moved, by whom, seconded by whom, and the outcome, plus
+  the archived index and vote panel it was read from.
 - `votes`: one row per member per motion, with the vote value where a source
-  published one.
+  published one, and the archived document that value was read from.
 - `members`: the people the clerk's labels resolve to. Name only.
 - `seats`: who held which seat, between which dates, and on what authority.
 - `artifacts`: the provenance ledger. One row per source document fetched, with
   its URL, its sha256 and when it was retrieved.
 - `publish_runs`: one row per publish, so you can see how fresh your copy is.
 - `v_votes`: the view that joins a vote to its motion, agenda item and meeting.
+- `v_vote_sources`: the same vote row beside the three documents behind it,
+  each as a URL and a sha256.
 
 ## What is not in it
 
@@ -42,9 +45,9 @@ all.
 ## Coverage and freshness
 
 102 meetings, from 2023-08-08 through 2026-09-01. Within that window: 2,688
-agenda items, 904 motions, 6,050 vote rows, 230 item identifiers, 11 members
-and 12 seats. Of the 6,050 vote rows, 4,064 carry a published vote value and
-1,986 do not.
+agenda items, 904 motions, 6,206 vote rows, 230 item identifiers, 11 members,
+12 seats and 1,242 provenance records. Of the 6,206 vote rows, 4,743 carry a
+published vote value and 1,463 do not.
 
 The maintainer republishes after each meeting cycle. To see when your copy was
 last written and what landed in it, read `meetings.publish_runs`, which has one
@@ -160,8 +163,8 @@ meanings and reliability tiers are in `DATA-DICTIONARY.md`.
 | `meetings` | `meeting_id` | `bodies` |
 | `agenda_items` | `agenda_item_id` | `meetings` |
 | `item_identifiers` | `identifier_id` | `agenda_items` |
-| `motions` | `motion_id` | `meetings`, `agenda_items`, `members` |
-| `votes` | `vote_id` | `motions`, `members` |
+| `motions` | `motion_id` | `meetings`, `agenda_items`, `members`, `artifacts` |
+| `votes` | `vote_id` | `motions`, `members`, `artifacts` |
 | `seats` | `person_id` plus `body_slug`, `role`, `valid_from` | `members`, `bodies` |
 | `artifacts` | `artifact_id` | `meetings` |
 | `publish_runs` | `run_id` | nothing |
@@ -170,7 +173,11 @@ The chain from a vote back to its context is
 vote to motion to agenda item to meeting to body, and separately vote to member.
 `meetings.v_votes` walks all of it for you with LEFT joins, which matters: a
 motion the clerk filed under no agenda item is real, and an inner join would
-drop exactly the rows worth checking on.
+drop exactly the rows worth checking on. `meetings.v_vote_sources` walks the
+other direction, from a vote row to the documents it rests on: the one its
+value was read from, the vote panel its member list came from, and the index
+its motion was parsed from. `queries/sources-for-a-vote.sql` prints them for
+one member on one date.
 
 ## Example queries
 
@@ -212,7 +219,7 @@ SELECT extract(year FROM m.meeting_date)::int AS year,
 
 ## How to read the votes correctly
 
-Four things will give you a wrong answer if you skip them.
+Five things will give you a wrong answer if you skip them.
 
 **A blank `vote_value` is not a no, and not an absence.** A row in `votes` means
 the member was recorded on that motion's vote panel. NULL in `vote_value` means
@@ -236,6 +243,14 @@ the parser recognized, because the clerk typed the staff recommendation where
 the verb goes; those are NULL rather than guessed at, and they need their own
 decision in your denominator.
 
+**`panel_status` says whether the member list is whole.** Granicus's vote-panel
+page crashes on the row of any member who recused or abstained and returns the
+rows it had rendered under an HTTP 500. Those rows are published and the motion
+carries `panel_status = 'partial'`, citing a ledger row whose `http_status` is
+500. The missing member is not inferred; the approved minutes name them later,
+and until then a denominator from a partial panel is one member short. `none`
+means no panel was served and any member rows were named by the minutes.
+
 **`member_name` is the clerk's label at that meeting, not a person.** It is the
 identity of the panel row, and it changes when the office changes: the same
 person appears as "Councilmember Kalani" before the July 2026 installation and
@@ -254,6 +269,16 @@ meetings have an agenda and no motions.
 
 Vote values lag the meeting. Minutes are ratified weeks later, so recent
 meetings arrive with `vote_value` blank and fill in on a later publish.
+
+Nineteen motions across the window have a partial or absent vote panel because
+of the Granicus recusal crash described under "How to read the votes
+correctly". `motions.panel_status` marks every one of them. The seven newest
+(2026-08-25 and 2026-09-01) will fill in from the approved minutes when the
+Clerk publishes them.
+
+Ten meeting rows, the eight caption-stream dates among them, are `regular`
+with no agenda items and a zero-length recording: Granicus placeholders, kept
+because the clerk's archive lists them.
 
 Coverage is the City Council only. Commissions and committees are planned, and
 the `bodies` table and the `body_slug` column on `meetings` are already in place
