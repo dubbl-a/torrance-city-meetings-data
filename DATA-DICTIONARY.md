@@ -116,6 +116,9 @@ is reachable only through the words in the title.
 | `motion_verb` | The verb matched against a known list, longest first. NULL on 68 motions where the clerk typed the recommendation where the verb goes. |
 | `motion_class` | procedural or substantive, derived from the verb. USABLE, not certified: it is an editorial grouping, and it is the filter a published count needs. |
 | `outcome` | approved or declined, as the clerk recorded it. |
+| `structure_artifact_id` | The archived Granicus index (`artifact_kind = structure_json`) this motion was parsed from. A real foreign key into `artifacts`. |
+| `panel_artifact_id` | The archived MetaViewer vote panel this motion's vote rows came from. NULL when no panel was served. |
+| `panel_status` | `complete`: Granicus served the whole panel. `partial`: the panel came from an HTTP 500 body that stopped rendering at a recusal or abstention row, so the member set is one short and the cited artifact's `http_status` is 500. `none`: no panel was served; any vote rows on this motion were named by the minutes. |
 
 ## `meetings.votes`
 
@@ -127,6 +130,7 @@ is reachable only through the words in the title.
 | `vote_value` | aye, no, absent, abstain, recused, or NULL for recorded but not published. |
 | `vote_value_source` | Which record supplied the value: `action_minutes`, `approved_minutes`, `transcript`, or NULL where none did. |
 | `person_id` | The resolved member. |
+| `source_artifact_id` | The archived document the value was read from, a foreign key into `artifacts`. Never NULL beside a non-NULL `vote_value`; the laptop refuses to publish a value that cites nothing. The artifact kind matches the source: `action_minutes` cites a `minutes_pdf`, `approved_minutes` an `approved_minutes_pdf`, `transcript` an `asr_envelope`. |
 
 ## `meetings.members`
 
@@ -164,6 +168,16 @@ traced to the bytes it was read from.
 | `fetched_at` | When. |
 | `superseded_by` | Points at the artifact that replaced this one. A source that changed between fetches becomes a new row with the old one marked, rather than a silent overwrite. |
 
+Two kinds of row need a word. A `vote_panel_<id>` row with `http_status` 500 is
+not a failed fetch: it is the partial panel Granicus returns when its renderer
+crashes on a recusal row, archived with the status it came with, and the
+motion that cites it carries `panel_status = 'partial'`. An `asr_envelope` row
+has a `source_url` beginning `local:` rather than `https:`, because the
+document is the maintainer's own transcription of the archived recording, not
+something the city served; its sha256 is still the hash of the exact bytes a
+`transcript` value was read from, and the recording it transcribes is the
+`video_mp4` row for the same meeting.
+
 The archived files themselves are not published. The ledger is, so a claim can
 be checked against the city's own copy at the recorded URL.
 
@@ -181,11 +195,24 @@ that rolled back leaves no claim that it happened.
 
 ## `meetings.v_votes`
 
-The one view, and deliberately the only one. It joins a vote to its motion,
-agenda item, meeting and body, plus the member the vote resolves to, and every
-join is LEFT. A motion filed under no agenda item and a vote whose label has not
-resolved to a person are both real states, and an inner join would silently drop
-exactly the rows a reader is most likely checking on.
+Joins a vote to its motion, agenda item, meeting and body, plus the member the
+vote resolves to, and every join is LEFT. A motion filed under no agenda item
+and a vote whose label has not resolved to a person are both real states, and
+an inner join would silently drop exactly the rows a reader is most likely
+checking on. Carries `source_artifact_id` and `panel_status` through.
+
+## `meetings.v_vote_sources`
+
+One row per vote row, beside the three documents behind it, each as
+`artifact_id`, `source_url`, `sha256` and (for the value source) `fetched_at`:
+
+| Prefix | The document |
+| --- | --- |
+| `source_*` | What the value was read from: the minutes PDF or the ASR envelope. NULL beside a NULL `vote_value`, never beside a value. |
+| `panel_*` | The MetaViewer vote panel the member list came from. `panel_http_status` is 500 for a partial panel. |
+| `structure_*` | The Granicus index the motion was parsed from. |
+
+Every join is LEFT, for the same reason as above.
 
 There are no summary views. A pre-aggregated count would freeze one question's
 shape, and a reader with SQL can ask their own.
