@@ -118,7 +118,7 @@ is reachable only through the words in the title.
 | `outcome` | approved or declined, as the clerk recorded it. |
 | `structure_artifact_id` | The archived Granicus index (`artifact_kind = structure_json`) this motion was parsed from. A real foreign key into `artifacts`. |
 | `panel_artifact_id` | The archived MetaViewer vote panel this motion's vote rows came from. NULL when no panel was served. |
-| `panel_status` | `complete`: Granicus served the whole panel. `partial`: the panel came from an HTTP 500 body that stopped rendering at a recusal or abstention row, so the member set is one short and the cited artifact's `http_status` is 500. `none`: no panel was served; any vote rows on this motion were named by the minutes. |
+| `panel_status` | `complete`: Granicus served the whole panel. `partial`: the panel came from an HTTP 500 body that stopped rendering at a recusal or abstention row, so the panel lacks that member's row and the cited artifact's `http_status` is 500; on a transcribed meeting the Clerk's announcement can supply the missing row (`votes.vote_value_source = 'transcript'`). `none`: no panel was served; any vote rows on this motion were named by the minutes. |
 
 ## `meetings.votes`
 
@@ -172,8 +172,8 @@ A `vote_panel_<id>` row with `http_status` 500 is not a failed fetch: it is the
 partial panel Granicus returns when its renderer crashes on a recusal row, and
 the motion citing it carries `panel_status = 'partial'`. An `asr_envelope` row
 has a `local:` rather than `https:` `source_url`: it is the maintainer's own
-transcription of the archived recording (the meeting's `video_mp4` row), and
-its sha256 is still the hash of the exact bytes a `transcript` value was read from.
+transcription of the archived recording (the meeting's `video_mp4` row); its
+sha256 hashes the exact bytes every `transcript` value was read from.
 
 The archived files themselves are not published. The ledger is, so a claim can
 be checked against the city's own copy at the recorded URL.

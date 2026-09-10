@@ -5,6 +5,14 @@ publication.
 
 ## 2026-09-09
 
+### Updated
+
+- A member the Clerk announces as recused or abstaining on a motion whose
+  Granicus panel is `partial` is now published from the transcript, citing the
+  ASR envelope; three of the seven newest partial panels carry values this way.
+  The access route is a repository issue; the website address is no longer
+  offered as an alternative.
+
 ### Added
 
 - Row-level provenance. `votes.source_artifact_id` names the archived
