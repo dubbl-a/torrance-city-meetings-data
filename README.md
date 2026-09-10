@@ -99,10 +99,9 @@ is the intended outcome, not a gap waiting to be filled in.
 
 The dataset is read-only and the connection string is handed out on request.
 Open an issue on this repository and say briefly what you plan to do with it.
-There is no fee and no approval committee. It is distributed out of
-band because a shared credential in a public repository is a credential that
-gets abused, not because the data is restricted. The URL looks like this, with
-the password filled in:
+There is no fee and no approval committee. It is distributed out of band because
+a shared credential in a public repository is a credential that gets abused, not
+because the data is restricted. The URL looks like this, with the password in:
 
 ```
 postgresql://meetings_reader:PASSWORD@ep-little-sun-ar2eiumm-pooler.c-4.us-west-2.aws.neon.tech/neondb?sslmode=require
