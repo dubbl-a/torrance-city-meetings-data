@@ -89,16 +89,17 @@ no meeting draws on two of them.
 Recovery refuses more than it accepts. A value is written only when the
 announced or minuted outcome matches the clerk's own index, every name resolves,
 every named member is on that motion's own panel, and any stated tally is
-arithmetically consistent with the attendance the same document states. Where
+arithmetically consistent with the attendance the same document states, with
+one exception: on a `partial` panel the member the Clerk announces as recused or
+abstaining is the missing row, written from the transcript. Where
 those do not reconcile, nothing is written and the value stays blank. Refusing
 is the intended outcome, not a gap waiting to be filled in.
 
 ## Getting access
 
 The dataset is read-only and the connection string is handed out on request.
-Open an issue on this repository, or write to the address on
-[torrancewatch.org](https://torrancewatch.org), and say briefly what you plan to
-do with it. There is no fee and no approval committee. It is distributed out of
+Open an issue on this repository and say briefly what you plan to do with it.
+There is no fee and no approval committee. It is distributed out of
 band because a shared credential in a public repository is a credential that
 gets abused, not because the data is restricted. The URL looks like this, with
 the password filled in:
@@ -247,9 +248,10 @@ decision in your denominator.
 page crashes on the row of any member who recused or abstained and returns the
 rows it had rendered under an HTTP 500. Those rows are published and the motion
 carries `panel_status = 'partial'`, citing a ledger row whose `http_status` is
-500. The missing member is not inferred; the approved minutes name them later,
-and until then a denominator from a partial panel is one member short. `none`
-means no panel was served and any member rows were named by the minutes.
+500. The missing member is never inferred: on a transcribed meeting the Clerk's
+announcement supplies the row (`vote_value_source = 'transcript'`, citing the ASR
+envelope); otherwise the minutes name them later and until then a partial-panel
+denominator is one member short. `none` means no panel was served.
 
 **`member_name` is the clerk's label at that meeting, not a person.** It is the
 identity of the panel row, and it changes when the office changes: the same
@@ -272,9 +274,8 @@ meetings arrive with `vote_value` blank and fill in on a later publish.
 
 Nineteen motions across the window have a partial or absent vote panel because
 of the Granicus recusal crash described under "How to read the votes
-correctly". `motions.panel_status` marks every one of them. The seven newest
-(2026-08-25 and 2026-09-01) will fill in from the approved minutes when the
-Clerk publishes them.
+correctly"; `motions.panel_status` marks each. Of the seven newest, three carry
+the Clerk's announced values, recusal included; four wait for the minutes.
 
 Ten meeting rows, the eight caption-stream dates among them, are `regular`
 with no agenda items and a zero-length recording: Granicus placeholders, kept
